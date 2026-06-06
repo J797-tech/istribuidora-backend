@@ -70,8 +70,12 @@ app.post('/api/auth/login', async (req, res) => {
 
 // --- RUTAS DE CLIENTES ---
 app.get('/api/clientes', async (req, res) => {
-    const clientes = await Client.find().sort({ createdAt: -1 });
-    res.json(clientes);
+    try {
+        const clientes = await Client.find().sort({ createdAt: -1 });
+        res.json(clientes);
+    } catch (err) {
+        res.status(500).json({ error: "Error al obtener clientes" });
+    }
 });
 
 app.post('/api/clientes', async (req, res) => {
@@ -81,6 +85,32 @@ app.post('/api/clientes', async (req, res) => {
         res.status(201).json(nuevo);
     } catch (err) {
         res.status(400).json({ error: "Error al guardar cliente" });
+    }
+});
+
+// ACTUALIZAR CLIENTE
+app.put('/api/clientes/:id', async (req, res) => {
+    try {
+        const actualizado = await Client.findByIdAndUpdate(
+            req.params.id,
+            req.body,
+            { new: true } // Retorna el documento ya actualizado
+        );
+        if (!actualizado) return res.status(404).json({ error: "Cliente no encontrado" });
+        res.json(actualizado);
+    } catch (err) {
+        res.status(400).json({ error: "Error al actualizar cliente" });
+    }
+});
+
+// ELIMINAR CLIENTE
+app.delete('/api/clientes/:id', async (req, res) => {
+    try {
+        const eliminado = await Client.findByIdAndDelete(req.params.id);
+        if (!eliminado) return res.status(404).json({ error: "Cliente no encontrado" });
+        res.json({ message: "Cliente eliminado correctamente" });
+    } catch (err) {
+        res.status(500).json({ error: "Error al eliminar cliente" });
     }
 });
 
